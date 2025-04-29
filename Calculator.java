@@ -11,16 +11,19 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class Calculator extends Frame {
-  private CalculatorButton[] buttonValues = CalculatorButton.values();
-  private Button[] buttons = new Button[buttonValues.length];
+  private CalculatorButton[] buttonValues;
+  private Button[] buttons;
+  private Label output;
   public static void main(String[] args) {
     new Calculator(400, 600);
   }
 
   public Calculator(int sizeX, int sizeY) {
-    // create output screen
-    Label output = new Label("some number");
+    buttonValues = CalculatorButton.values();
+    buttons = new Button[buttonValues.length];
 
+    // create output screen
+    output = new Label();
     Panel outScreen = ComponentBuilder.panelBuilder(sizeX, (int) getPercentage(sizeY, 20), new FlowLayout(), new Component[]{output}, AppColor.WHITE.get());
 
     // create buttons
@@ -54,8 +57,13 @@ public class Calculator extends Frame {
       button.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           Button buttonClicked = (Button) e.getSource();
-          if (buttonClicked.getLabel() == CalculatorButton.OFF.getLabel()) offButtonClicked();
-          else if (buttonClicked.getLabel() == CalculatorButton.ON.getLabel()) onButtonClicked();
+          String labelClicked = buttonClicked.getLabel();
+
+          if (labelClicked == CalculatorButton.OFF.getLabel()) offButtonClicked();
+          else if (labelClicked == CalculatorButton.ON.getLabel()) onButtonClicked();
+          else if (labelClicked == CalculatorButton.CLEAR.getLabel()) output.setText("");
+          else if (labelClicked == CalculatorButton.EQUALS.getLabel()) evaluateAnswer();
+          else output.setText(output.getText() + labelClicked);
         }
       });
       buttons[i] = button;
@@ -75,6 +83,10 @@ public class Calculator extends Frame {
     for (Button button : buttons) {
       button.setEnabled(true);
     }
+  }
+
+  private void evaluateAnswer() {
+
   }
 }
 
