@@ -14,11 +14,13 @@ public class Calculator extends Frame {
   private CalculatorButton[] buttonValues;
   private Button[] buttons;
   private Label output;
+  private PostfixNotation pn;
   public static void main(String[] args) {
     new Calculator(400, 600);
   }
 
   public Calculator(int sizeX, int sizeY) {
+    pn = new PostfixNotation();
     buttonValues = CalculatorButton.values();
     buttons = new Button[buttonValues.length];
 
@@ -63,7 +65,7 @@ public class Calculator extends Frame {
           else if (labelClicked == CalculatorButton.ON.getLabel()) onButtonClicked();
           else if (labelClicked == CalculatorButton.CLEAR.getLabel()) output.setText("");
           else if (labelClicked == CalculatorButton.EQUALS.getLabel()) evaluateAnswer();
-          else output.setText(output.getText() + labelClicked);
+          else output.setText(output.getText() + " " + labelClicked);
         }
       });
       buttons[i] = button;
@@ -86,7 +88,8 @@ public class Calculator extends Frame {
   }
 
   private void evaluateAnswer() {
-
+    String infix = output.getText();
+    output.setText("= " + pn.evaluatePostfix(pn.infixToPostfix(infix)));
   }
 }
 
