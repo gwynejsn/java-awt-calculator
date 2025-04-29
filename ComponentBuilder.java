@@ -1,4 +1,3 @@
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.LayoutManager;
@@ -22,15 +21,5 @@ public class ComponentBuilder {
     }
 
     return panel;
-  }
-
-  public static Component[] generateCalculatorButtons() {
-    CalculatorButton[] buttonValues = CalculatorButton.values();
-    Component[] buttons = new Component[buttonValues.length];
-
-    for (int i = 0; i < buttonValues.length; i++)
-      buttons[i] = new Button(buttonValues[i].getLabel());
-
-    return buttons;
   }
 }
