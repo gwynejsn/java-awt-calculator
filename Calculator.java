@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -17,6 +18,7 @@ public class Calculator extends Frame {
   private Button[] buttons;
   private Label output;
   private PostfixNotation pn;
+  private KeyListener calculatorKeyListeners;
   public static void main(String[] args) {
     new Calculator(400, 600);
   }
@@ -25,6 +27,21 @@ public class Calculator extends Frame {
     pn = new PostfixNotation();
     buttonValues = CalculatorButton.values();
     buttons = new Button[buttonValues.length];
+
+    calculatorKeyListeners = new KeyAdapter() {
+      @Override
+      public void keyPressed(KeyEvent e) {
+        char c = e.getKeyChar();
+        if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_C)
+          handleInput(CalculatorButton.CLEAR.getLabel());
+        if (c == KeyEvent.VK_ENTER || c == '=')
+          handleInput(CalculatorButton.EQUALS.getLabel());
+        else if (c == KeyEvent.VK_BACK_SPACE)
+          handleInput(CalculatorButton.BACKSPACE.getLabel());
+        else
+          handleInput(c + "");
+      }
+    };
 
     // create output screen
     output = new Label(" ");
@@ -45,7 +62,7 @@ public class Calculator extends Frame {
     // make keyboards also functional
     setFocusable(true);
     requestFocusInWindow();
-    addKeyEvents();
+    this.addKeyListener(calculatorKeyListeners);
 
     setSize(sizeX, sizeY);
     setVisible(true);
@@ -69,12 +86,13 @@ public class Calculator extends Frame {
     else if (labelClicked.equals(CalculatorButton.EQUALS.getLabel())) evaluateAnswer();
     else if (labelClicked.equals(CalculatorButton.BACKSPACE.getLabel())) backspaceClicked();
     else if (pn.isOperator(labelClicked)) output.setText(output.getText() + " " + labelClicked + " ");
-    else if (labelClicked.charAt(0) >= '0' && labelClicked.charAt(0) <= '9') output.setText(output.getText() + labelClicked);
+    else if ((labelClicked.charAt(0) >= '0' && labelClicked.charAt(0) <= '9') || labelClicked.equals("."))
+      output.setText(output.getText() + labelClicked);
   }
 
   private Component[] generateCalculatorButtons() {
     for (int i = 0; i < buttonValues.length; i++) {
-      Button button = new Button(buttonValues[i].getLabel());
+      Button button = ComponentBuilder.buttonBuilder(buttonValues[i].getLabel());
       button.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           Button buttonClicked = (Button) e.getSource();
@@ -89,35 +107,21 @@ public class Calculator extends Frame {
     return buttons;
   }
 
-  private void addKeyEvents() {
-    this.addKeyListener(new KeyAdapter() {
-      @Override
-      public void keyPressed(KeyEvent e) {
-        char c = e.getKeyChar();
-        if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_C)
-          handleInput(CalculatorButton.CLEAR.getLabel());
-        if (c == KeyEvent.VK_ENTER || c == '=')
-          handleInput(CalculatorButton.EQUALS.getLabel());
-        else if (c == KeyEvent.VK_BACK_SPACE)
-          handleInput(CalculatorButton.BACKSPACE.getLabel());
-        else
-          handleInput(c + "");
-      }
-    });
-  }
-
   private void offButtonClicked() {
     for (Button button : buttons) {
       if (!(button.getLabel() == CalculatorButton.ON.getLabel()))
         button.setEnabled(false);
     }
     output.setText(" ");
+    this.removeKeyListener(calculatorKeyListeners);
   }
 
   private void onButtonClicked() {
     for (Button button : buttons) {
       button.setEnabled(true);
     }
+    this.addKeyListener(calculatorKeyListeners);
+    requestFocus();
   }
 
   private void evaluateAnswer() {
@@ -132,7 +136,12 @@ public class Calculator extends Frame {
   private void backspaceClicked() {
     String currOut = output.getText();
     if (currOut.length() > 0)
-      if (pn.isOperator(currOut.charAt(currOut.length() - 1) + ""))
+      if (
+        pn.isOperator(currOut.charAt(currOut.length() - 1) + "") ||
+        // case where +{space}number to delete operator instead of space
+        pn.isOperator(currOut.charAt(currOut.length() - 2) + "")
+
+      )
         output.setText(currOut.substring(0, currOut.length() - 2));
       else
         output.setText(currOut.substring(0, currOut.length() - 1));

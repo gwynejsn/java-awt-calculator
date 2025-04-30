@@ -4,11 +4,8 @@ import java.util.EmptyStackException;
 public class PostfixNotation {
   private MySinglyLLStack<String> stack;
 
-  public PostfixNotation() {
-    stack = new MySinglyLLStack<>();
-  }
-
   public double evaluatePostfix(String postfix) {
+    stack = new MySinglyLLStack<>();
     String[] elements = postfix.split(" ");
     
     for (int i = 0; i < elements.length; i++) {
@@ -44,6 +41,7 @@ public class PostfixNotation {
   }
   
   public String infixToPostfix(String infix) {
+    stack = new MySinglyLLStack<>();
     String[] elements = infix.trim().split(" ");
     String postfix = "";
     for (int i = 0; i < elements.length; i++) {
