@@ -43,7 +43,6 @@ public class PostfixNotation {
   public String infixToPostfix(String infix) {
     stack = new MySinglyLLStack<>();
     String[] elements = infix.trim().split(" ");
-    for (String s : elements) System.out.println(s);
     String postfix = "";
     for (int i = 0; i < elements.length; i++) {
       String s = elements[i];

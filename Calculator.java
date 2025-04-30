@@ -20,6 +20,7 @@ public class Calculator extends Frame {
   private Label output;
   private PostfixNotation pn;
   private KeyListener calculatorKeyListeners;
+  private boolean errorOccured;
   public static void main(String[] args) {
     new Calculator(400, 600);
   }
@@ -49,7 +50,7 @@ public class Calculator extends Frame {
     output = new Label(" ");
     output.setForeground(AppColor.WHITE.get());
     output.setFont(new Font("Arial", Font.PLAIN, 30));
-    Panel outScreen = ComponentBuilder.panelBuilder(sizeX, (int) getPercentage(sizeY, 40), new GridLayout(1, 1), new Component[]{output}, AppColor.DEEP_NAVY.get());
+    Panel outScreen = ComponentBuilder.panelBuilder(sizeX, (int) getPercentage(sizeY, 40), new GridLayout(2, 1), new Component[]{output}, AppColor.DEEP_NAVY.get());
 
     // create buttons
     generateCalculatorButtons();
@@ -83,17 +84,40 @@ public class Calculator extends Frame {
 
   private void handleInput(String labelClicked) {
     if (labelClicked.equals(CalculatorButton.OFF.getLabel())) offButtonClicked();
+
     else if (labelClicked.equals(CalculatorButton.ON.getLabel())) onButtonClicked();
-    else if (labelClicked.equals(CalculatorButton.CLEAR.getLabel())) output.setText("");
+
+    else if (labelClicked.equals(CalculatorButton.CLEAR.getLabel())) onClearClicked();
+
     else if (labelClicked.equals(CalculatorButton.EQUALS.getLabel())) evaluateAnswer();
+
     else if (labelClicked.equals(CalculatorButton.BACKSPACE.getLabel())) backspaceClicked();
 
-    else if (pn.isOperator(labelClicked)) output.setText(output.getText() + " " + labelClicked + " ");
+    else if (pn.isOperator(labelClicked)) output.setText(output.getText() + " " + labelClicked);
 
-    else if (labelClicked.equals("(") || labelClicked.equals(")")) parenthesesClicked(labelClicked);
+    // space operator
+    // number -> put space if before it is not a number
+    // space parentheses
+    else if (
+      (labelClicked.charAt(0) >= '0' && labelClicked.charAt(0) <= '9') ||
+      labelClicked.equals(".") || isParentheses(labelClicked)
+    ) {
+      String out = output.getText();
 
-    else if ((labelClicked.charAt(0) >= '0' && labelClicked.charAt(0) <= '9') || labelClicked.equals("."))
-      output.setText(output.getText() + labelClicked);
+      if (out.trim().length() > 0) {
+        char lastChar = out.charAt(out.length() - 1);
+        if (lastChar >= '0' && lastChar <= '9' && !isParentheses(labelClicked)) {
+          output.setText(output.getText() + labelClicked); // no space for numbers
+          return;
+        }
+      }
+      output.setText(output.getText() + " " + labelClicked); // put space for operators and parentheses
+    }
+  }
+
+  private boolean isParentheses(String s) {
+    char c = s.charAt(0);
+    return c == '(' || c == ')';
   }
 
   private Component[] generateCalculatorButtons() {
@@ -113,34 +137,17 @@ public class Calculator extends Frame {
     return buttons;
   }
 
-  private void parenthesesClicked(String s) {
-    String currOut = output.getText();
-
-    if (s.equals("(")) {
-      if (currOut.length() > 2) {
-        String last = currOut.charAt(currOut.length() - 2) + "";
-
-        if (pn.isOperator(last) || last.equals("(") || last.equals(")")) {
-          output.setText(currOut + "( "); // no space between operator and parentheses
-        } else {
-          output.setText(" " + currOut + "( "); // put space for number
-        }
-      } else output.setText("( "); // empty
-    } else { // for ")" assuming always after a number
-      output.setText(currOut + " ) ");
-    }
-  }
-
   private void offButtonClicked() {
     for (Button button : buttons) {
       if (!(button.getLabel() == CalculatorButton.ON.getLabel()))
         button.setEnabled(false);
     }
-    output.setText(" ");
+    onClearClicked();
     this.removeKeyListener(calculatorKeyListeners);
   }
 
   private void onButtonClicked() {
+    onClearClicked();
     for (Button button : buttons) {
       button.setEnabled(true);
     }
@@ -148,32 +155,34 @@ public class Calculator extends Frame {
     requestFocus();
   }
 
+  private void onClearClicked() {
+    errorOccured = false;
+    output.setText("");
+    requestFocus();
+  }
+
   private void evaluateAnswer() {
     String infix = output.getText().trim();
-    if ((infix.charAt(0) + "").equals(CalculatorButton.EQUALS.getLabel()))
-      // remove = when the user continuously do operations
-      output.setText("= " + pn.evaluatePostfix(pn.infixToPostfix(infix.substring(2))));
-    else
-      output.setText("= " + pn.evaluatePostfix(pn.infixToPostfix(infix)));
+    if (errorOccured) {
+      onClearClicked();
+      return;
+    }
+    try {
+      if ((infix.charAt(0) + "").equals(CalculatorButton.EQUALS.getLabel()))
+        // remove = when the user continuously do operations
+        output.setText("= " + pn.evaluatePostfix(pn.infixToPostfix(infix.substring(2))));
+      else
+        output.setText("= " + pn.evaluatePostfix(pn.infixToPostfix(infix)));
+    } catch (IllegalArgumentException err) {
+      output.setText("Error: " + err.getMessage());
+      errorOccured = true;
+    }
   }
 
   private void backspaceClicked() {
     String currOut = output.getText();
     if (currOut.length() > 0)
-      if (
-        pn.isOperator(currOut.charAt(currOut.length() - 1) + "") ||
-        // case where +{space}number to delete operator instead of space
-        pn.isOperator(currOut.charAt(currOut.length() - 2) + "")
-
-      )
         output.setText(currOut.substring(0, currOut.length() - 2));
-      else if (
-        currOut.charAt(currOut.length() - 2) == '(' ||
-        currOut.charAt(currOut.length() - 2) == ')'
-      )
-        output.setText(currOut.substring(0, currOut.length() - 2));
-      else
-        output.setText(currOut.substring(0, currOut.length() - 1));
   }
 }
 
