@@ -1,11 +1,11 @@
 #!/bin/bash
 
 FILE="Calculator.java"
-CLASS="Calculator.class"
-LAST_HASH=$(md5 -q "$FILE")
+CLASS="Calculator"
+LAST_HASH=""
 JAVA_PID=""
 
-# Function to kill previous Java process
+# Kill the Java process if it's running
 kill_java() {
   if [ -n "$JAVA_PID" ] && kill -0 "$JAVA_PID" 2>/dev/null; then
     echo "Stopping previous Java program (PID: $JAVA_PID)..."
@@ -14,8 +14,16 @@ kill_java() {
   fi
 }
 
+# Make sure the file exists first
+if [ ! -f "$FILE" ]; then
+  echo "Error: $FILE does not exist."
+  exit 1
+fi
+
+LAST_HASH=$(md5sum "$FILE" | awk '{ print $1 }')
+
 while true; do
-  NEW_HASH=$(md5 -q "$FILE")
+  NEW_HASH=$(md5sum "$FILE" | awk '{ print $1 }')
   if [ "$NEW_HASH" != "$LAST_HASH" ]; then
     echo "Detected change. Compiling..."
     javac "$FILE"

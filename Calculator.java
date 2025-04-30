@@ -1,5 +1,6 @@
 import java.awt.Button;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridLayout;
@@ -24,6 +25,7 @@ public class Calculator extends Frame {
   }
 
   public Calculator(int sizeX, int sizeY) {
+    this.setMinimumSize(new Dimension(sizeX, sizeY));
     pn = new PostfixNotation();
     buttonValues = CalculatorButton.values();
     buttons = new Button[buttonValues.length];
@@ -85,7 +87,11 @@ public class Calculator extends Frame {
     else if (labelClicked.equals(CalculatorButton.CLEAR.getLabel())) output.setText("");
     else if (labelClicked.equals(CalculatorButton.EQUALS.getLabel())) evaluateAnswer();
     else if (labelClicked.equals(CalculatorButton.BACKSPACE.getLabel())) backspaceClicked();
+
     else if (pn.isOperator(labelClicked)) output.setText(output.getText() + " " + labelClicked + " ");
+
+    else if (labelClicked.equals("(") || labelClicked.equals(")")) parenthesesClicked(labelClicked);
+
     else if ((labelClicked.charAt(0) >= '0' && labelClicked.charAt(0) <= '9') || labelClicked.equals("."))
       output.setText(output.getText() + labelClicked);
   }
@@ -105,6 +111,24 @@ public class Calculator extends Frame {
     }
 
     return buttons;
+  }
+
+  private void parenthesesClicked(String s) {
+    String currOut = output.getText();
+
+    if (s.equals("(")) {
+      if (currOut.length() > 2) {
+        String last = currOut.charAt(currOut.length() - 2) + "";
+
+        if (pn.isOperator(last) || last.equals("(") || last.equals(")")) {
+          output.setText(currOut + "( "); // no space between operator and parentheses
+        } else {
+          output.setText(" " + currOut + "( "); // put space for number
+        }
+      } else output.setText("( "); // empty
+    } else { // for ")" assuming always after a number
+      output.setText(currOut + " ) ");
+    }
   }
 
   private void offButtonClicked() {
@@ -141,6 +165,11 @@ public class Calculator extends Frame {
         // case where +{space}number to delete operator instead of space
         pn.isOperator(currOut.charAt(currOut.length() - 2) + "")
 
+      )
+        output.setText(currOut.substring(0, currOut.length() - 2));
+      else if (
+        currOut.charAt(currOut.length() - 2) == '(' ||
+        currOut.charAt(currOut.length() - 2) == ')'
       )
         output.setText(currOut.substring(0, currOut.length() - 2));
       else

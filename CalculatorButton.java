@@ -3,7 +3,8 @@ public enum CalculatorButton {
   SEVEN("7"), EIGHT("8"), NINE("9"), DIVIDE("/"),
   FOUR("4"), FIVE("5"), SIX("6"), MULTIPLY("*"),
   ONE("1"), TWO("2"), THREE("3"), MINUS("-"),
-  ZERO("0"), DOT("."), EQUALS("="), PLUS("+");
+  ZERO("0"), DOT("."), EQUALS("="), PLUS("+"),
+  LEFT_PARENTHESES("("), RIGHT_PARENTHESES(")"), POWER("^");
 
   private final String label;
 

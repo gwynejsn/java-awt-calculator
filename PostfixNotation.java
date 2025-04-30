@@ -43,6 +43,7 @@ public class PostfixNotation {
   public String infixToPostfix(String infix) {
     stack = new MySinglyLLStack<>();
     String[] elements = infix.trim().split(" ");
+    for (String s : elements) System.out.println(s);
     String postfix = "";
     for (int i = 0; i < elements.length; i++) {
       String s = elements[i];
@@ -54,21 +55,28 @@ public class PostfixNotation {
       } else if (s.equals("(")) {
         stack.push(s);
       } else if (s.equals(")")) {
-        while (!stack.isEmpty() && stack.peek().charAt(0) != '(') postfix += stack.pop() + " ";
+        while (!stack.isEmpty() && !stack.peek().equals("("))
+            postfix += stack.pop() + " ";
         stack.pop(); // pop (
       } else {
         postfix += s + " ";
       }
     }
     // empty stack
-    while (!stack.isEmpty())
-      postfix += stack.pop();
+    while (!stack.isEmpty()) {
+        String top = stack.pop();
+        if (top.equals("(")) {
+            throw new IllegalArgumentException("Unmatched opening parenthesis in expression.");
+        }
+        postfix += top + " ";
+    }
     return postfix;
   }
 
   public boolean isOperator(String token) {
     return token.equals("+") || token.equals("-") ||
-            token.equals("*") || token.equals("/") || token.equals("^");
+            token.equals("*") || token.equals("/") ||
+            token.equals("^");
   }
 
   private int getPrecedence(String s) {
