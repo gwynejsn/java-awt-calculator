@@ -50,7 +50,7 @@ public class Calculator extends Frame {
     output = new Label(" ");
     output.setForeground(AppColor.WHITE.get());
     output.setFont(new Font("Arial", Font.PLAIN, 30));
-    Panel outScreen = ComponentBuilder.panelBuilder(sizeX, (int) getPercentage(sizeY, 40), new GridLayout(2, 1), new Component[]{output}, AppColor.DEEP_NAVY.get());
+    Panel outScreen = ComponentBuilder.panelBuilder(sizeX, (int) getPercentage(sizeY, 40), new GridLayout(1, 1), new Component[]{output}, AppColor.DEEP_NAVY.get());
 
     // create buttons
     generateCalculatorButtons();
