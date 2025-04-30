@@ -44,7 +44,7 @@ public class PostfixNotation {
   }
   
   public String infixToPostfix(String infix) {
-    String[] elements = infix.split(" ");
+    String[] elements = infix.trim().split(" ");
     String postfix = "";
     for (int i = 0; i < elements.length; i++) {
       String s = elements[i];
@@ -65,10 +65,11 @@ public class PostfixNotation {
     // empty stack
     while (!stack.isEmpty())
       postfix += stack.pop();
+    System.out.println(postfix);
     return postfix;
   }
 
-  private static boolean isOperator(String token) {
+  public boolean isOperator(String token) {
     return token.equals("+") || token.equals("-") ||
             token.equals("*") || token.equals("/") || token.equals("^");
   }

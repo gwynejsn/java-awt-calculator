@@ -1,6 +1,6 @@
 import java.awt.Button;
 import java.awt.Component;
-import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Label;
@@ -25,8 +25,10 @@ public class Calculator extends Frame {
     buttons = new Button[buttonValues.length];
 
     // create output screen
-    output = new Label();
-    Panel outScreen = ComponentBuilder.panelBuilder(sizeX, (int) getPercentage(sizeY, 20), new FlowLayout(), new Component[]{output}, AppColor.WHITE.get());
+    output = new Label(" ");
+    output.setForeground(AppColor.WHITE.get());
+    output.setFont(new Font("Arial", Font.PLAIN, 20));
+    Panel outScreen = ComponentBuilder.panelBuilder(sizeX, (int) getPercentage(sizeY, 40), new GridLayout(1, 1), new Component[]{output}, AppColor.DEEP_NAVY.get());
 
     // create buttons
     generateCalculatorButtons();
@@ -65,7 +67,9 @@ public class Calculator extends Frame {
           else if (labelClicked == CalculatorButton.ON.getLabel()) onButtonClicked();
           else if (labelClicked == CalculatorButton.CLEAR.getLabel()) output.setText("");
           else if (labelClicked == CalculatorButton.EQUALS.getLabel()) evaluateAnswer();
-          else output.setText(output.getText() + " " + labelClicked);
+          else if (labelClicked == CalculatorButton.BACKSPACE.getLabel()) backspaceClicked();
+          else if (pn.isOperator(labelClicked)) output.setText(output.getText() + " " + labelClicked + " ");
+          else output.setText(output.getText() + labelClicked);
         }
       });
       buttons[i] = button;
@@ -78,6 +82,7 @@ public class Calculator extends Frame {
     for (Button button : buttons) {
       if (!(button.getLabel() == CalculatorButton.ON.getLabel()))
         button.setEnabled(false);
+        output.setText(" ");
     }
   }
 
@@ -90,6 +95,15 @@ public class Calculator extends Frame {
   private void evaluateAnswer() {
     String infix = output.getText();
     output.setText("= " + pn.evaluatePostfix(pn.infixToPostfix(infix)));
+  }
+
+  private void backspaceClicked() {
+    String currOut = output.getText();
+    if (currOut.length() > 0)
+      if (pn.isOperator(currOut.charAt(currOut.length() - 1) + ""))
+        output.setText(currOut.substring(0, currOut.length() - 2));
+      else
+        output.setText(currOut.substring(0, currOut.length() - 1));
   }
 }
 
