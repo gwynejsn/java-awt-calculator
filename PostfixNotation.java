@@ -65,7 +65,6 @@ public class PostfixNotation {
     // empty stack
     while (!stack.isEmpty())
       postfix += stack.pop();
-    System.out.println(postfix);
     return postfix;
   }
 
